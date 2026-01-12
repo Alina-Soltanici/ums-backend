@@ -28,7 +28,6 @@ public class AuthController {
     }
 
 
-   // @CrossOrigin(origins = "http://127.0.0.1:5500", allowedHeaders = "*", methods = {RequestMethod.POST, RequestMethod.OPTIONS})
     @PostMapping("/auth/signup")
     public ResponseEntity<RegisterResponse> register(@RequestBody RegisterRequest registerRequest) {
         return new ResponseEntity<> (authService.register (registerRequest), HttpStatus.CREATED);
