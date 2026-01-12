@@ -32,5 +32,6 @@ build/
 ### VS Code ###
 .vscode/
 
-# Spring Boot properties
-/src/main/resources/application*.properties
+src/main/resources/application.properties
+src/main/resources/application-dev.properties
+
