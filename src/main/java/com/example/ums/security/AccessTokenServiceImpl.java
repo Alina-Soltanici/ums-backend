@@ -18,7 +18,6 @@ import java.util.HashMap;
 import java.util.Map;
 
 @RequiredArgsConstructor
-@Component
 
 @Service
 public class AccessTokenServiceImpl implements AccessTokenService {
