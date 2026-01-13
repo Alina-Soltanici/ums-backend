@@ -31,9 +31,13 @@ public class AccessTokenServiceImpl implements AccessTokenService {
 
     @PostConstruct
     public void init() {
+        System.out.println("JWT_SECRET length = " +
+                (jwtSecret == null ? "NULL" : jwtSecret.length()));
+
         if (jwtSecret == null || jwtSecret.length() < 32) {
-            throw new IllegalStateException("JWT_SECRET must be at least 32 characters long");
+            throw new IllegalStateException("JWT_SECRET invalid");
         }
+
         this.key = Keys.hmacShaKeyFor(jwtSecret.getBytes(StandardCharsets.UTF_8));
     }
 
