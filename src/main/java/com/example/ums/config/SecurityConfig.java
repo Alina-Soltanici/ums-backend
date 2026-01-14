@@ -38,7 +38,6 @@ public class SecurityConfig {
                 .authorizeHttpRequests(request -> request
                         // Public routes
                         .requestMatchers("/api/auth/**").permitAll()
-                        .requestMatchers("/").permitAll() // allow root
                         .requestMatchers("/error").permitAll() // allow error page
 
                         // Admin routes
