@@ -22,30 +22,40 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
 import java.util.Arrays;
 
-
 @RequiredArgsConstructor
 @EnableWebSecurity
 @Configuration
 public class SecurityConfig {
+
     private final UserDetailsService userDetailsService;
     private final JwtFilter jwtFilter;
 
     @Bean
-    SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         return http
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
-                .csrf ((csrf) -> csrf.disable ())
-                .authorizeHttpRequests ((request) ->
-                        request.requestMatchers ("/api/auth/**").permitAll ()
-                                .requestMatchers("/").permitAll()
-                                .requestMatchers("/api/admin/**").hasAuthority("ADMIN")
-                                .requestMatchers("/api/user/**").hasAnyAuthority("USER", "ADMIN")
-                                .requestMatchers(org.springframework.http.HttpMethod.OPTIONS, "/**").permitAll()
-                                .anyRequest().authenticated())
+                .csrf(csrf -> csrf.disable())
+                .authorizeHttpRequests(request -> request
+                        // Public routes
+                        .requestMatchers("/api/auth/**").permitAll()
+                        .requestMatchers("/").permitAll() // allow root
+                        .requestMatchers("/error").permitAll() // allow error page
 
-                .sessionManagement ((session) -> session.sessionCreationPolicy (SessionCreationPolicy.STATELESS))
+                        // Admin routes
+                        .requestMatchers("/api/admin/**").hasAuthority("ADMIN")
+
+                        // User routes
+                        .requestMatchers("/api/user/**").hasAnyAuthority("USER", "ADMIN")
+
+                        // Allow preflight OPTIONS requests
+                        .requestMatchers(org.springframework.http.HttpMethod.OPTIONS, "/**").permitAll()
+
+                        // All other requests need authentication
+                        .anyRequest().authenticated()
+                )
+                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class)
-                .build ();
+                .build();
     }
 
     @Bean
@@ -53,8 +63,8 @@ public class SecurityConfig {
         CorsConfiguration configuration = new CorsConfiguration();
         configuration.setAllowedOrigins(Arrays.asList(
                 "http://localhost:3000",      // React dev server
-                "http://localhost:5173",
-                "https://ums-frontend-orpin.vercel.app" //Vercel frontend
+                "http://localhost:5173",      // vite dev server
+                "https://ums-frontend-orpin.vercel.app" // Vercel frontend
         ));
         configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
         configuration.setAllowedHeaders(Arrays.asList("*"));
@@ -83,4 +93,3 @@ public class SecurityConfig {
         return provider;
     }
 }
-
