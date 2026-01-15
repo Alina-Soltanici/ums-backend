@@ -105,16 +105,18 @@ public class AuthServiceImpl implements AuthService {
         Customer customer = customerRepository.findByUserId(userPrincipal.getId())
                 .orElseThrow(() -> new CustomerNotFoundException("Customer not found for user " + userPrincipal.getId()));
 
+        String role = userPrincipal.getAuthorities()
+                .iterator()
+                .next()
+                .getAuthority();
+
         LoginResponse loginResponse = new LoginResponse();
         loginResponse.setAccessToken(token);
         loginResponse.setRefreshToken(refreshToken.getToken());
         loginResponse.setTokenType("Bearer");
         loginResponse.setUserId(userPrincipal.getId());
 
-        String role = userPrincipal.getAuthorities()
-                .iterator()
-                .next()
-                .getAuthority();
+
 
         loginResponse.setRole(role);
         loginResponse.setFirstName(customer.getFirstName());
@@ -123,6 +125,7 @@ public class AuthServiceImpl implements AuthService {
     }
 
     @Override
+    @Transactional
     public RefreshTokenResponse refresh(RefreshTokenRequest refreshTokenRequest) {
         String refreshTokenFromRequest = refreshTokenRequest.getRefreshToken();
         String jti = refreshTokenService.extractJtiFromToken(refreshTokenFromRequest);
