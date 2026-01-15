@@ -91,5 +91,15 @@ public class GlobalHandlerException {
         return new ResponseEntity<>(errorMap, HttpStatus.UNAUTHORIZED);
     }
 
+    @ExceptionHandler(CustomerNotFoundException.class)
+    public ResponseEntity<?> handleCustomerNotFoundException(CustomerNotFoundException customerNotFoundException){
+        Map<String, Object> errorMap = new HashMap<> ();
+        errorMap.put ("timestamp", LocalDateTime.now ());
+        errorMap.put ("status", HttpStatus.NOT_FOUND.value ());
+        errorMap.put ("error", "Not found");
+        errorMap.put ("message", customerNotFoundException.getMessage ());
+        return new ResponseEntity<> (errorMap, HttpStatus.NOT_FOUND);
+    }
+
 
 }
