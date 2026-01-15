@@ -110,18 +110,14 @@ public class AuthServiceImpl implements AuthService {
                 .next()
                 .getAuthority();
 
-        LoginResponse loginResponse = new LoginResponse();
-        loginResponse.setAccessToken(token);
-        loginResponse.setRefreshToken(refreshToken.getToken());
-        loginResponse.setTokenType("Bearer");
-        loginResponse.setUserId(userPrincipal.getId());
-
-
-
-        loginResponse.setRole(role);
-        loginResponse.setFirstName(customer.getFirstName());
-
-        return loginResponse;
+        return LoginResponse.builder()
+                .accessToken(token)
+                .refreshToken(refreshToken.getToken())
+                .tokenType("Bearer")
+                .userId(userPrincipal.getId())
+                .role(role)
+                .firstName(customer.getFirstName())
+                .build();
     }
 
     @Override
