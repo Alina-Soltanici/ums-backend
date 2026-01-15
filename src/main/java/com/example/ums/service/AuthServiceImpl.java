@@ -3,6 +3,7 @@ package com.example.ums.service;
 
 import com.example.ums.dto.*;
 import com.example.ums.entity.*;
+import com.example.ums.exceptions.CustomerNotFoundException;
 import com.example.ums.exceptions.InvalidRefreshTokenException;
 import com.example.ums.exceptions.RoleNotFoundException;
 import com.example.ums.exceptions.UserAlreadyExistsException;
@@ -102,7 +103,7 @@ public class AuthServiceImpl implements AuthService {
 
         assert userPrincipal != null;
         Customer customer = customerRepository.findByUserId(userPrincipal.getId())
-                .orElseThrow(() -> new RuntimeException("Customer not found for user " + userPrincipal.getId()));
+                .orElseThrow(() -> new CustomerNotFoundException("Customer not found for user " + userPrincipal.getId()));
 
         LoginResponse loginResponse = new LoginResponse();
         loginResponse.setAccessToken(token);
