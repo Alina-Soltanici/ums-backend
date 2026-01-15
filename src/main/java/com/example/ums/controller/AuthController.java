@@ -5,6 +5,7 @@ import com.example.ums.security.AccessTokenService;
 import com.example.ums.security.RefreshTokenService;
 import com.example.ums.service.AuthService;
 import com.example.ums.service.TokenBlacklistService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -28,13 +29,13 @@ public class AuthController {
 
 
     @PostMapping("/auth/signup")
-    public ResponseEntity<RegisterResponse> register(@RequestBody RegisterRequest registerRequest) {
+    public ResponseEntity<RegisterResponse> register(@Valid @RequestBody RegisterRequest registerRequest) {
         return new ResponseEntity<> (authService.register (registerRequest), HttpStatus.CREATED);
     }
 
 
     @PostMapping("/auth/login")
-    public ResponseEntity<LoginResponse> login(@RequestBody LoginRequest loginRequest) {
+    public ResponseEntity<LoginResponse> login(@Valid @RequestBody LoginRequest loginRequest) {
         return new ResponseEntity<>(authService.login(loginRequest), HttpStatus.OK);
     }
 
