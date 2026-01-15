@@ -20,6 +20,8 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
 import java.util.Set;
 
 @Slf4j
@@ -37,6 +39,7 @@ public class AuthServiceImpl implements AuthService {
     private final RefreshTokenRepository refreshTokenRepository;
 
     @Override
+    @Transactional
     public RegisterResponse register(RegisterRequest registerRequest) {
         if(userRepository.existsByEmail (registerRequest.getEmail())) {
             log.info("Email already exists: {}", registerRequest.getEmail());
@@ -81,6 +84,7 @@ public class AuthServiceImpl implements AuthService {
     }
 
     @Override
+    @Transactional
     public LoginResponse login(LoginRequest loginRequest) {
         Authentication authentication = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(loginRequest.getEmail(), loginRequest.getPassword()));
 
