@@ -39,6 +39,19 @@ public class AuthServiceImpl implements AuthService {
     private final RefreshTokenService refreshTokenService;
     private final RefreshTokenRepository refreshTokenRepository;
 
+
+    public TokenPair generateTokenPair(UserPrincipal userPrincipal) {
+        String accessToken = accessTokenService.generateToken(userPrincipal);
+        RefreshToken refreshToken = refreshTokenService.generateRefreshToken(userPrincipal);
+
+        refreshTokenService.saveRefreshToken(refreshToken);
+
+        return TokenPair.builder()
+                .accessToken(accessToken)
+                .refreshToken(refreshToken.getToken())
+                .build();
+    }
+
     @Override
     @Transactional
     public RegisterResponse register(RegisterRequest registerRequest) {
@@ -47,40 +60,32 @@ public class AuthServiceImpl implements AuthService {
             throw new UserAlreadyExistsException("Email already taken!");
         }
 
-
-
-        User user = new User ();
-
-        user.setEmail (registerRequest.getEmail());
-        user.setPassword (passwordEncoder.encode (registerRequest.getPassword ()));
-
         Role defaultRole = roleRepository.findByName("USER")
                 .orElseThrow (() -> new RoleNotFoundException("Role not found!"));
 
-        user.setRoles(Set.of (defaultRole));
-        User savedUser = userRepository.save (user);
+        User savedUser = userRepository.save(User.builder()
+                .email(registerRequest.getEmail())
+                .password(passwordEncoder.encode (registerRequest.getPassword ()))
+                .roles(Set.of(defaultRole))
+                .build());
 
-
-        Customer customer = new Customer();
-        customer.setFirstName(registerRequest.getFirstName());
-        customer.setLastName(registerRequest.getLastName());
-        customer.setPhoneNumber(registerRequest.getPhoneNumber());
-        customer.setAddress(registerRequest.getAddress());
-        customer.setCity(registerRequest.getCity());
-        customer.setUser(savedUser);
-
-        customerRepository.save(customer);
+        customerRepository.save(Customer.builder()
+                .firstName(registerRequest.getFirstName())
+                .lastName(registerRequest.getLastName())
+                .phoneNumber(registerRequest.getPhoneNumber())
+                .address(registerRequest.getAddress())
+                .city(registerRequest.getCity())
+                .user(savedUser)
+                .build());
 
         log.info("User registered successfully");
 
         UserPrincipal userPrincipal = new UserPrincipal(savedUser);
-        String accessToken = accessTokenService.generateToken(userPrincipal);
 
-        RefreshToken refreshToken = refreshTokenService.generateRefreshToken(userPrincipal);
-        refreshTokenService.saveRefreshToken(refreshToken);
+        TokenPair tokens = generateTokenPair(userPrincipal);
         RegisterResponse response = userMapper.toDto(savedUser);
-        response.setAccessToken(accessToken);
-        response.setRefreshToken(refreshToken.getToken());
+        response.setAccessToken(tokens.getAccessToken());
+        response.setRefreshToken(tokens.getRefreshToken());
         return response;
     }
 
