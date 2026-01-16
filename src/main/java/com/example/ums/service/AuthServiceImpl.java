@@ -19,11 +19,14 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -92,35 +95,31 @@ public class AuthServiceImpl implements AuthService {
     @Override
     @Transactional
     public LoginResponse login(LoginRequest loginRequest) {
-        Authentication authentication = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(loginRequest.getEmail(), loginRequest.getPassword()));
-
+        Authentication authentication = authenticationManager.authenticate(
+                new UsernamePasswordAuthenticationToken(loginRequest.getEmail(), loginRequest.getPassword())
+        );
 
         log.info("Login request received for email: {}", loginRequest.getEmail());
 
         UserPrincipal userPrincipal = (UserPrincipal) authentication.getPrincipal();
 
-        String token = accessTokenService.generateToken(userPrincipal);
-        log.info("Access token issued successfully:)");
-        RefreshToken refreshToken = refreshTokenService.generateRefreshToken(userPrincipal);
-        refreshTokenService.saveRefreshToken(refreshToken);
-        log.info("Refresh token issued successfully!");
-        log.info("User logged successfully");
+        TokenPair tokens = generateTokenPair(userPrincipal);
+        log.info("Tokens issued successfully for user {}", userPrincipal.getId());
 
-        assert userPrincipal != null;
+
         Customer customer = customerRepository.findByUserId(userPrincipal.getId())
                 .orElseThrow(() -> new CustomerNotFoundException("Customer not found for user " + userPrincipal.getId()));
 
-        String role = userPrincipal.getAuthorities()
-                .iterator()
-                .next()
-                .getAuthority();
+        List<String> roles = userPrincipal.getAuthorities().stream()
+                .map(GrantedAuthority::getAuthority)
+                .collect(Collectors.toList());
 
         return LoginResponse.builder()
-                .accessToken(token)
-                .refreshToken(refreshToken.getToken())
+                .accessToken(tokens.getAccessToken())
+                .refreshToken(tokens.getRefreshToken())
                 .tokenType("Bearer")
                 .userId(userPrincipal.getId())
-                .role(role)
+                .roles(roles)
                 .firstName(customer.getFirstName())
                 .build();
     }
