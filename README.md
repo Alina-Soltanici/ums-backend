@@ -107,5 +107,4 @@ This project is open source and available under the MIT License.
 
 ## 🔗 Related Projects
 
-- https://ums-frontend.vercel.app - Live demo deployed on Vercel
 - [Frontend Repository](https://github.com/Alina-Soltanici/ums-frontend) - Source code
