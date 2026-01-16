@@ -89,6 +89,8 @@ public class AuthServiceImpl implements AuthService {
         RegisterResponse response = userMapper.toDto(savedUser);
         response.setAccessToken(tokens.getAccessToken());
         response.setRefreshToken(tokens.getRefreshToken());
+        response.setUserId(savedUser.getId()); // <--- send userId
+        response.setRoles(savedUser.getRoles().stream().map(Role::getName).toList());
         return response;
     }
 
