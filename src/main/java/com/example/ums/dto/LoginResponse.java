@@ -3,6 +3,8 @@ package com.example.ums.dto;
 import lombok.Builder;
 import lombok.Data;
 
+import java.util.List;
+
 
 @Data
 @Builder
@@ -12,6 +14,6 @@ public class LoginResponse {
     private String refreshToken;
     private String tokenType;
     private Long userId;
-    private String role;
+    private List<String> roles;
     private String firstName;
 }
